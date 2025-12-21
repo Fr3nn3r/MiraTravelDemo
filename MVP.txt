@@ -1,0 +1,138 @@
+The killer MVP demo capabilities (by role)
+
+1) Product Owner (Insurance Product / Underwriting)
+
+As a Product Owner, I can create a new parametric product from a template in minutes in order to launch faster and test new offers without a big IT project.
+
+As a Product Owner, I can configure payout tiers and eligibility parameters in a guided UI in order to control product economics without relying on engineers.
+
+As a Product Owner, I can preview the product logic as a readable rule flow in order to validate intent with legal/compliance quickly.
+
+2) Claims Ops Lead
+
+As a Claims Ops Lead, I can run a realistic claim simulation and get an instant decision in order to prove straight-through processing potential and reduce manual handling.
+
+As a Claims Ops Lead, I can see a human-readable decision trace (what rules fired, what data was used) in order to resolve disputes faster and train staff consistently.
+
+As a Claims Ops Lead, I can export an “audit JSON” (decision + inputs + version hash) in order to support QA, complaints handling, and regulator questions.
+
+3) QA / Governance / Compliance
+
+As a QA manager, I can run a regression test pack against a model version in order to catch breaking changes before production.
+
+As a Compliance officer, I can compare two versions and see what changed and which decisions would flip in order to approve renewals confidently.
+
+As a Governance owner, I can publish a model version with an approval trail in order to enforce controlled change management.
+
+4) Data / Integration Engineer (the “will this be a nightmare?” person)
+
+As an Integration Engineer, I can send a minimal claim event payload to a Decision API and receive decision + payout + trace in order to integrate with low blast radius.
+
+As an Integration Engineer, I can switch external data sources (stub vs live flight status) in order to test safely without production dependencies.
+
+As an Integration Engineer, I can monitor decision outcomes and errors in a simple dashboard in order to operate the service reliably.
+
+5) Exec Sponsor (Head of Claims / COO)
+
+As an Exec Sponsor, I can see quantified change impact (how many decisions change, payout delta) in order to decide business rollout with confidence.
+
+As an Exec Sponsor, I can see time-to-decision and automation rate metrics in order to justify investment with a clear business case.
+
+If you only demo 5 things, demo these
+
+Template → configured product in minutes (time-to-market)
+
+Instant decision on a real-looking claim (automation)
+
+Readable trace + exportable audit artifact (defensibility)
+
+Version compare + regression pack (renewal/change safety)
+
+Minimal integration contract (low IT risk)
+
+Everything else is noise until you have pull.
+
+
+
+Context:
+
+
+
+Sell a narrow SKU first:
+
+“Flight Delay Benefit Decisioning + Audit Trace”
+
+Who buys first (most realistic):
+
+
+
+Travel insurers / travel MGAs who want a differentiated product fast
+
+Distributors later (OTA/airline), usually once there’s an insurer capacity partner in place
+
+Pricing (simple):
+
+
+
+base platform fee (covers governance, audit, uptime)
+
+usage fee (per active policy / per decision / per booking protected)
+
+You win when:
+
+
+
+your fee is a fraction of saved handling cost + gained conversion value
+
+The hard punchline (so you don’t build the wrong thing)
+
+Your “super generic supports any contract + reinsurance” engine is not your MVP.
+
+Your MVP is:
+
+
+
+a repeatable template library + primitives
+
+a tiny configuration UI
+
+a decision API
+
+testing + diff/impact report
+
+one event source connector
+
+If you can’t show:
+
+
+
+“we shipped a product in days”
+
+“we can safely update it”
+
+“we reduced touch time to ~zero”
+
+
+
+…then nobody rational buys.
+
+What I recommend you do next (very concrete)
+
+Choose wedge: Flight arrival delay benefit (one product, one jurisdiction pack, one flight data source).
+
+Build the demo console first: template → parameters → run claim → show trace.
+
+Build 20–30 primitives max: keep modeling “LEGO-like”, not “programming language”.
+
+Add model versioning + regression runner: your renewal nightmare antidote.
+
+Pilot with a design partner: prove savings + improved customer experience with a small integration.
+
+And yes: there are already companies selling parametric flight disruption experiences, which is good news because it proves demand (and tells you the bar). Blink Parametric
+
+
+
+----------
+
+
+
