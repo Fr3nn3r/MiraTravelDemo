@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Product, ProductConfig, PayoutTier, Exclusion } from '@/lib/engine/types';
+import { RulePreview } from '@/components/RulePreview';
 
 function PayoutTiersEditor({
   tiers,
@@ -276,14 +277,19 @@ export default function ProductDetailPage({
         </Button>
       </div>
 
-      <Tabs defaultValue="tiers" className="space-y-4">
+      <Tabs defaultValue="preview" className="space-y-4">
         <TabsList>
+          <TabsTrigger value="preview">Preview Rules</TabsTrigger>
           <TabsTrigger value="tiers">Payout Tiers</TabsTrigger>
           <TabsTrigger value="eligibility">Eligibility</TabsTrigger>
           <TabsTrigger value="exclusions">Exclusions</TabsTrigger>
           <TabsTrigger value="datasource">Data Source</TabsTrigger>
           <TabsTrigger value="reasoncodes">Reason Codes</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="preview">
+          <RulePreview config={config} productName={product.name} />
+        </TabsContent>
 
         <TabsContent value="tiers">
           <Card>
