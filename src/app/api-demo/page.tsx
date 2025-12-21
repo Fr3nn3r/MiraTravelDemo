@@ -109,7 +109,7 @@ export default function APIDemoPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">API Demo</h1>
+        <h1 className="text-2xl font-semibold" data-testid="api-demo-heading">API Demo</h1>
         <p className="text-muted-foreground">
           Test the Decision API with sample payloads - Integration Engineer reference
         </p>
@@ -150,7 +150,7 @@ export default function APIDemoPage() {
                 />
               </div>
 
-              <Button onClick={handleSubmit} disabled={isLoading} className="w-full">
+              <Button onClick={handleSubmit} disabled={isLoading} className="w-full" data-testid="send-request-button">
                 {isLoading ? (
                   <>
                     <svg className="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
@@ -225,7 +225,7 @@ export default function APIDemoPage() {
               <CardTitle>Response</CardTitle>
               {response && (
                 <div className="flex items-center gap-2">
-                  <Badge className={response.success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
+                  <Badge className={response.success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'} data-testid="response-status">
                     {response.success ? 'Success' : 'Error'}
                   </Badge>
                   <span className="text-sm text-muted-foreground">

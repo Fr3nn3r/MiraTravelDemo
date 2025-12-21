@@ -29,7 +29,7 @@ function ProductCard({ product }: { product: Product }) {
   });
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="hover:shadow-md transition-shadow" data-testid="product-card">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div>
@@ -91,12 +91,12 @@ export default function ProductsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">Products</h1>
+          <h1 className="text-2xl font-semibold" data-testid="products-heading">Products</h1>
           <p className="text-muted-foreground">
             Manage parametric insurance products and their configurations
           </p>
         </div>
-        <Button onClick={() => setShowNewDialog(true)}>
+        <Button onClick={() => setShowNewDialog(true)} data-testid="new-product-button">
           <svg
             className="w-4 h-4 mr-2"
             fill="none"

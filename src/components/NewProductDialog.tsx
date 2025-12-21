@@ -97,6 +97,7 @@ export function NewProductDialog({
                 key={template.id}
                 className="cursor-pointer hover:border-primary hover:shadow-md transition-all"
                 onClick={() => handleSelectTemplate(template)}
+                data-testid={`template-card-${template.id}`}
               >
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
@@ -159,7 +160,7 @@ export function NewProductDialog({
             Cancel
           </Button>
           {step === 'details' && (
-            <Button onClick={handleCreate} disabled={!productName.trim() || isCreating}>
+            <Button onClick={handleCreate} disabled={!productName.trim() || isCreating} data-testid="create-product-button">
               {isCreating ? 'Creating...' : 'Create Product'}
             </Button>
           )}

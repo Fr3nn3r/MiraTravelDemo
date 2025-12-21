@@ -63,7 +63,7 @@ function DecisionResultCard({ decision }: { decision: Decision }) {
 
   return (
     <div className="space-y-4">
-      <Card className={isApproved ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
+      <Card className={isApproved ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'} data-testid="decision-result">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg">Decision Result</CardTitle>
@@ -217,7 +217,7 @@ export default function SimulatorPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">Claim Simulator</h1>
+        <h1 className="text-2xl font-semibold" data-testid="simulator-heading">Claim Simulator</h1>
         <p className="text-muted-foreground">
           Test claim decisions against configured products with full trace visibility
         </p>
@@ -332,6 +332,7 @@ export default function SimulatorPage() {
                   !claim.flightDate ||
                   !claim.productId
                 }
+                data-testid="run-decision-button"
               >
                 {isLoading ? (
                   <>
@@ -388,7 +389,7 @@ export default function SimulatorPage() {
             <CardContent>
               <Accordion type="single" collapsible className="w-full">
                 <AccordionItem value="samples">
-                  <AccordionTrigger>View {sampleClaims.length} sample claims</AccordionTrigger>
+                  <AccordionTrigger data-testid="sample-claims-trigger">View {sampleClaims.length} sample claims</AccordionTrigger>
                   <AccordionContent>
                     <div className="space-y-2">
                       {sampleClaims.map((sample) => (

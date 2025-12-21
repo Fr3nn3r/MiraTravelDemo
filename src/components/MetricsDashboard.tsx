@@ -115,7 +115,7 @@ export function MetricsDashboard({ productId }: MetricsDashboardProps) {
   const maxDecisions = Math.max(...last7dTrend.map((d) => d.decisions));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="metrics-dashboard">
       {/* Key Metrics Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
