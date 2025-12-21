@@ -130,11 +130,11 @@ export interface VersionChangeImpact {
   }[];
 }
 
-export function calculateVersionChangeImpact(
+export async function calculateVersionChangeImpact(
   productId: string,
   fromConfig: ProductConfig,
   toConfig: ProductConfig
-): VersionChangeImpact {
+): Promise<VersionChangeImpact> {
   const testCases = flightDelayTestPack.testCases;
   const affectedClaims: VersionChangeImpact['affectedClaims'] = [];
 
@@ -146,13 +146,13 @@ export function calculateVersionChangeImpact(
   for (const testCase of testCases) {
     // Evaluate with "from" config by running against the test case
     // For demo, we simulate by checking if config changes would affect this test
-    const fromDecision = evaluateClaimDecision({
+    const fromDecision = await evaluateClaimDecision({
       ...testCase.claimInput,
       productId,
       productVersion: 'from',
     });
 
-    const toDecision = evaluateClaimDecision({
+    const toDecision = await evaluateClaimDecision({
       ...testCase.claimInput,
       productId,
       productVersion: 'to',

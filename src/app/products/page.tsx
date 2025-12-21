@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { getAllProducts, subscribe } from '@/lib/data/product-store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -68,16 +67,25 @@ export default function ProductsPage() {
   const router = useRouter();
   const [filter, setFilter] = useState<'all' | ProductStatus>('all');
   const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [showNewDialog, setShowNewDialog] = useState(false);
 
-  const refreshProducts = useCallback(() => {
-    setProducts(getAllProducts());
+  const refreshProducts = useCallback(async () => {
+    try {
+      const res = await fetch('/api/products');
+      const data = await res.json();
+      if (data.success) {
+        setProducts(data.products);
+      }
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   useEffect(() => {
     refreshProducts();
-    const unsubscribe = subscribe(refreshProducts);
-    return unsubscribe;
   }, [refreshProducts]);
 
   const handleProductCreated = (productId: string) => {
@@ -139,7 +147,13 @@ export default function ProductsPage() {
         ))}
       </div>
 
-      {filteredProducts.length === 0 && (
+      {isLoading && (
+        <div className="text-center py-12 text-muted-foreground">
+          Loading products...
+        </div>
+      )}
+
+      {!isLoading && filteredProducts.length === 0 && (
         <div className="text-center py-12 text-muted-foreground">
           No products found with status "{filter}"
         </div>

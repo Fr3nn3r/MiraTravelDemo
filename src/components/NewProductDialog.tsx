@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -14,11 +14,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import {
-  getProductTemplates,
-  createProductFromTemplate,
-  ProductTemplate,
-} from '@/lib/data/product-store';
+import { ProductConfig } from '@/lib/engine/types';
+
+interface ProductTemplate {
+  id: string;
+  name: string;
+  description: string;
+  region: string;
+  config: ProductConfig;
+}
 
 interface NewProductDialogProps {
   open: boolean;
@@ -36,8 +40,24 @@ export function NewProductDialog({
   const [productName, setProductName] = useState('');
   const [productDescription, setProductDescription] = useState('');
   const [isCreating, setIsCreating] = useState(false);
+  const [templates, setTemplates] = useState<ProductTemplate[]>([]);
 
-  const templates = getProductTemplates();
+  useEffect(() => {
+    async function fetchTemplates() {
+      try {
+        const res = await fetch('/api/products/templates');
+        const data = await res.json();
+        if (data.success) {
+          setTemplates(data.templates);
+        }
+      } catch (error) {
+        console.error('Error fetching templates:', error);
+      }
+    }
+    if (open) {
+      fetchTemplates();
+    }
+  }, [open]);
 
   const handleSelectTemplate = (template: ProductTemplate) => {
     setSelectedTemplate(template);
@@ -51,13 +71,22 @@ export function NewProductDialog({
 
     setIsCreating(true);
     try {
-      const product = createProductFromTemplate(
-        selectedTemplate.id,
-        productName.trim(),
-        productDescription.trim()
-      );
-      onProductCreated(product.id);
-      handleClose();
+      const res = await fetch('/api/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          templateId: selectedTemplate.id,
+          name: productName.trim(),
+          description: productDescription.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.product) {
+        onProductCreated(data.product.id);
+        handleClose();
+      }
+    } catch (error) {
+      console.error('Error creating product:', error);
     } finally {
       setIsCreating(false);
     }

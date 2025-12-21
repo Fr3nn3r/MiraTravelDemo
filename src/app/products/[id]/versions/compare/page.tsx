@@ -1,14 +1,13 @@
 'use client';
 
-import { use } from 'react';
+import { use, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { getProductById } from '@/lib/data/product-store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ProductConfig } from '@/lib/engine/types';
+import { Product, ProductConfig } from '@/lib/engine/types';
 import { flightDelayTestPack } from '@/lib/engine/regression-runner';
 
 function ConfigDiff({
@@ -210,10 +209,32 @@ export default function CompareVersionsPage({
 }) {
   const { id } = use(params);
   const searchParams = useSearchParams();
-  const product = getProductById(id);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fromVersion = searchParams.get('from') || '';
   const toVersion = searchParams.get('to') || '';
+
+  useEffect(() => {
+    async function fetchProduct() {
+      try {
+        const res = await fetch(`/api/products/${id}`);
+        const data = await res.json();
+        if (data.success) {
+          setProduct(data.product);
+        }
+      } catch (error) {
+        console.error('Error fetching product:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchProduct();
+  }, [id]);
+
+  if (isLoading) {
+    return <div className="text-center py-12">Loading...</div>;
+  }
 
   if (!product) {
     return (

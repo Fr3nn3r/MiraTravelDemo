@@ -91,7 +91,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<DecisionA
     }
 
     const claimInput: ClaimInput = validation.data;
-    const decision = evaluateClaimDecision(claimInput);
+    const decision = await evaluateClaimDecision(claimInput);
 
     const processingTimeMs = Math.round(performance.now() - startTime);
 

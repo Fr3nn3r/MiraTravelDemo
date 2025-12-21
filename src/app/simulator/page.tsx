@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,10 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { evaluateClaimDecision, exportAuditArtifact } from '@/lib/engine/decision-engine';
+import { exportAuditArtifact } from '@/lib/engine/decision-engine';
 import { getSampleClaims } from '@/lib/data/claims';
-import { getAllProducts } from '@/lib/data/product-store';
-import { ClaimInput, Decision, TraceStep } from '@/lib/engine/types';
+import { ClaimInput, Decision, Product, TraceStep } from '@/lib/engine/types';
 
 function TraceStepCard({ step, index }: { step: TraceStep; index: number }) {
   const resultColors = {
@@ -189,19 +188,65 @@ export default function SimulatorPage() {
   });
   const [decision, setDecision] = useState<Decision | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
 
-  const products = getAllProducts().filter((p) => p.status === 'active');
+  useEffect(() => {
+    async function fetchProducts() {
+      try {
+        const res = await fetch('/api/products');
+        const data = await res.json();
+        if (data.success) {
+          setProducts(data.products.filter((p: Product) => p.status === 'active'));
+        }
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      }
+    }
+    fetchProducts();
+  }, []);
+
   const sampleClaims = getSampleClaims();
 
   const selectedProduct = products.find((p) => p.id === claim.productId);
 
   const handleRunDecision = async () => {
     setIsLoading(true);
-    // Simulate async processing
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    const result = evaluateClaimDecision(claim);
-    setDecision(result);
-    setIsLoading(false);
+    try {
+      const res = await fetch('/api/decision', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(claim),
+      });
+      const data = await res.json();
+      if (data.success && data.decision) {
+        // Transform API response to match Decision type
+        const result: Decision = {
+          id: data.decision.id,
+          outcome: data.decision.outcome,
+          payoutAmountUSD: data.decision.payoutAmountUSD,
+          reasonCodes: data.decision.reasonCodes,
+          productVersion: data.decision.productVersion,
+          productHash: data.decision.productHash,
+          timestamp: data.decision.timestamp,
+          trace: data.trace || [],
+          claimInput: claim,
+          flightData: data.flightData || {
+            flightNo: claim.flightNo,
+            flightDate: claim.flightDate,
+            scheduledArrival: '',
+            actualArrival: null,
+            delayMinutes: 0,
+            delayReason: 'none',
+            status: 'on_time',
+          },
+        };
+        setDecision(result);
+      }
+    } catch (error) {
+      console.error('Error running decision:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleLoadSample = (sample: ClaimInput) => {

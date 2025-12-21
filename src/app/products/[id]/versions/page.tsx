@@ -1,8 +1,7 @@
 'use client';
 
-import { use, useState } from 'react';
+import { use, useState, useEffect } from 'react';
 import Link from 'next/link';
-import { getProductById } from '@/lib/data/product-store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,6 +11,7 @@ import {
   runRegressionPack,
   RegressionRunSummary,
 } from '@/lib/engine/regression-runner';
+import { Product } from '@/lib/engine/types';
 
 export default function VersionsPage({
   params,
@@ -19,10 +19,28 @@ export default function VersionsPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const product = getProductById(id);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isRunning, setIsRunning] = useState(false);
   const [testResults, setTestResults] = useState<RegressionRunSummary | null>(null);
   const testPacks = getTestPacks();
+
+  useEffect(() => {
+    async function fetchProduct() {
+      try {
+        const res = await fetch(`/api/products/${id}`);
+        const data = await res.json();
+        if (data.success) {
+          setProduct(data.product);
+        }
+      } catch (error) {
+        console.error('Error fetching product:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchProduct();
+  }, [id]);
 
   const handleRunTests = async () => {
     if (!product) return;
@@ -30,14 +48,20 @@ export default function VersionsPage({
     setIsRunning(true);
     setTestResults(null);
 
-    // Simulate async test execution
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    const pack = testPacks[0];
-    const results = runRegressionPack(pack, product.id, product.activeVersion);
-    setTestResults(results);
-    setIsRunning(false);
+    try {
+      const pack = testPacks[0];
+      const results = await runRegressionPack(pack, product.id, product.activeVersion);
+      setTestResults(results);
+    } catch (error) {
+      console.error('Error running tests:', error);
+    } finally {
+      setIsRunning(false);
+    }
   };
+
+  if (isLoading) {
+    return <div className="text-center py-12">Loading...</div>;
+  }
 
   if (!product) {
     return (

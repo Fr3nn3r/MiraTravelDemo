@@ -6,7 +6,7 @@ import {
   TraceStep,
 } from './types';
 import { getFlightData } from '@/lib/data/flights';
-import { getProductById } from '@/lib/data/product-store';
+import { getProductById } from '@/lib/supabase';
 
 function generateId(): string {
   return Math.random().toString(36).substring(2, 11);
@@ -29,14 +29,14 @@ function createTraceStep(
   };
 }
 
-export function evaluateClaimDecision(claim: ClaimInput): Decision {
+export async function evaluateClaimDecision(claim: ClaimInput): Promise<Decision> {
   const trace: TraceStep[] = [];
   let outcome: DecisionOutcome = 'approved';
   let payoutAmountUSD = 0;
   const reasonCodes: string[] = [];
 
   // Step 1: Validate product exists
-  const product = getProductById(claim.productId);
+  const product = await getProductById(claim.productId);
   if (!product) {
     trace.push(
       createTraceStep(

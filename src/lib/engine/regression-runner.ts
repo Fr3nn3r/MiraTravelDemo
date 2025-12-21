@@ -184,13 +184,13 @@ export const flightDelayTestPack: RegressionTestPack = {
   ],
 };
 
-export function runRegressionTest(
+export async function runRegressionTest(
   testCase: RegressionTestCase,
   mockDate?: Date
-): RegressionResult {
+): Promise<RegressionResult> {
   // If mockDate provided, we'd need to mock the date in evaluation
   // For now, we rely on test setup to handle date mocking
-  const decision = evaluateClaimDecision(testCase.claimInput);
+  const decision = await evaluateClaimDecision(testCase.claimInput);
 
   const passed =
     decision.outcome === testCase.expectedOutcome &&
@@ -219,11 +219,11 @@ export function runRegressionTest(
   };
 }
 
-export function runRegressionPack(
+export async function runRegressionPack(
   pack: RegressionTestPack,
   productId: string,
   productVersion: string
-): RegressionRunSummary {
+): Promise<RegressionRunSummary> {
   const results: RegressionResult[] = [];
 
   for (const testCase of pack.testCases) {
@@ -236,7 +236,7 @@ export function runRegressionPack(
         productVersion,
       },
     };
-    results.push(runRegressionTest(adjustedTestCase));
+    results.push(await runRegressionTest(adjustedTestCase));
   }
 
   const passed = results.filter((r) => r.passed).length;
