@@ -47,7 +47,7 @@ describe('Regression Runner', () => {
   });
 
   describe('runRegressionTest', () => {
-    it('should pass test when decision matches expected outcome', () => {
+    it('should pass test when decision matches expected outcome', async () => {
       const testCase: RegressionTestCase = {
         id: 'test-pass',
         name: 'Test Pass Case',
@@ -63,7 +63,7 @@ describe('Regression Runner', () => {
         expectedPayout: 175,
       };
 
-      const result = runRegressionTest(testCase);
+      const result = await runRegressionTest(testCase);
 
       expect(result.passed).toBe(true);
       expect(result.actualOutcome).toBe('approved');
@@ -71,7 +71,7 @@ describe('Regression Runner', () => {
       expect(result.diff).toBeNull();
     });
 
-    it('should fail test when outcome differs', () => {
+    it('should fail test when outcome differs', async () => {
       const testCase: RegressionTestCase = {
         id: 'test-fail-outcome',
         name: 'Test Fail Outcome',
@@ -87,13 +87,13 @@ describe('Regression Runner', () => {
         expectedPayout: 0,
       };
 
-      const result = runRegressionTest(testCase);
+      const result = await runRegressionTest(testCase);
 
       expect(result.passed).toBe(false);
       expect(result.diff).toContain('outcome: expected denied, got approved');
     });
 
-    it('should fail test when payout differs', () => {
+    it('should fail test when payout differs', async () => {
       const testCase: RegressionTestCase = {
         id: 'test-fail-payout',
         name: 'Test Fail Payout',
@@ -109,7 +109,7 @@ describe('Regression Runner', () => {
         expectedPayout: 999,
       };
 
-      const result = runRegressionTest(testCase);
+      const result = await runRegressionTest(testCase);
 
       expect(result.passed).toBe(false);
       expect(result.diff).toContain('payout: expected $999, got $175');
@@ -117,8 +117,8 @@ describe('Regression Runner', () => {
   });
 
   describe('runRegressionPack', () => {
-    it('should run all tests in the pack', () => {
-      const summary = runRegressionPack(
+    it('should run all tests in the pack', async () => {
+      const summary = await runRegressionPack(
         flightDelayTestPack,
         'prod-eu-delay',
         'v1.2'
@@ -129,8 +129,8 @@ describe('Regression Runner', () => {
       expect(summary.results.length).toBe(summary.totalTests);
     });
 
-    it('should include correct metadata in summary', () => {
-      const summary = runRegressionPack(
+    it('should include correct metadata in summary', async () => {
+      const summary = await runRegressionPack(
         flightDelayTestPack,
         'prod-eu-delay',
         'v1.2'
@@ -143,8 +143,8 @@ describe('Regression Runner', () => {
       expect(summary.runAt).toBeDefined();
     });
 
-    it('should override product id and version for all tests', () => {
-      const summary = runRegressionPack(
+    it('should override product id and version for all tests', async () => {
+      const summary = await runRegressionPack(
         flightDelayTestPack,
         'prod-us-delay',
         'v1.0'

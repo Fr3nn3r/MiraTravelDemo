@@ -21,6 +21,7 @@ const config = {
     }]
   },
   testMatch: ['**/__tests__/**/*.(ts|tsx)', '**/*.(test|spec).(ts|tsx)'],
+  testPathIgnorePatterns: ['/node_modules/', '/e2e/'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
