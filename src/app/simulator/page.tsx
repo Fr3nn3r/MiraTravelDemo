@@ -10,7 +10,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { evaluateClaimDecision, exportAuditArtifact } from '@/lib/engine/decision-engine';
 import { getSampleClaims } from '@/lib/data/claims';
-import { getAllProducts } from '@/lib/data/products';
+import { getAllProducts } from '@/lib/data/product-store';
 import { ClaimInput, Decision, TraceStep } from '@/lib/engine/types';
 
 function TraceStepCard({ step, index }: { step: TraceStep; index: number }) {

@@ -3,7 +3,7 @@
 import { use, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { getProductById } from '@/lib/data/products';
+import { getProductById, createNewVersion } from '@/lib/data/product-store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -205,15 +205,23 @@ export default function ProductDetailPage({
   };
 
   const handleSaveDraft = () => {
-    // In a real app, this would persist the changes
-    alert('Draft saved! (In demo mode, changes are not persisted)');
-    setHasChanges(false);
+    if (!config) return;
+    const newVersion = createNewVersion(id, config, false);
+    if (newVersion) {
+      alert(`Draft saved as ${newVersion.version} (${newVersion.hash})`);
+      setHasChanges(false);
+      router.refresh();
+    }
   };
 
   const handlePublish = () => {
-    // In a real app, this would create a new version and publish
-    alert('Published! (In demo mode, changes are not persisted)');
-    setHasChanges(false);
+    if (!config) return;
+    const newVersion = createNewVersion(id, config, true);
+    if (newVersion) {
+      alert(`Published as ${newVersion.version} (${newVersion.hash})`);
+      setHasChanges(false);
+      router.refresh();
+    }
   };
 
   return (

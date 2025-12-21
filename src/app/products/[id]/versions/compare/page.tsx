@@ -3,7 +3,7 @@
 import { use } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { getProductById } from '@/lib/data/products';
+import { getProductById } from '@/lib/data/product-store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';

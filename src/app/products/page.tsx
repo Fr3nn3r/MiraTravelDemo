@@ -1,12 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { getAllProducts } from '@/lib/data/products';
+import { useRouter } from 'next/navigation';
+import { getAllProducts, subscribe } from '@/lib/data/product-store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Product, ProductStatus } from '@/lib/engine/types';
+import { NewProductDialog } from '@/components/NewProductDialog';
 
 function StatusBadge({ status }: { status: ProductStatus }) {
   const variants: Record<ProductStatus, { label: string; className: string }> = {
@@ -63,8 +65,24 @@ function ProductCard({ product }: { product: Product }) {
 }
 
 export default function ProductsPage() {
+  const router = useRouter();
   const [filter, setFilter] = useState<'all' | ProductStatus>('all');
-  const products = getAllProducts();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [showNewDialog, setShowNewDialog] = useState(false);
+
+  const refreshProducts = useCallback(() => {
+    setProducts(getAllProducts());
+  }, []);
+
+  useEffect(() => {
+    refreshProducts();
+    const unsubscribe = subscribe(refreshProducts);
+    return unsubscribe;
+  }, [refreshProducts]);
+
+  const handleProductCreated = (productId: string) => {
+    router.push(`/products/${productId}`);
+  };
 
   const filteredProducts =
     filter === 'all' ? products : products.filter((p) => p.status === filter);
@@ -78,7 +96,7 @@ export default function ProductsPage() {
             Manage parametric insurance products and their configurations
           </p>
         </div>
-        <Button>
+        <Button onClick={() => setShowNewDialog(true)}>
           <svg
             className="w-4 h-4 mr-2"
             fill="none"
@@ -95,6 +113,12 @@ export default function ProductsPage() {
           New from Template
         </Button>
       </div>
+
+      <NewProductDialog
+        open={showNewDialog}
+        onOpenChange={setShowNewDialog}
+        onProductCreated={handleProductCreated}
+      />
 
       <div className="flex gap-2">
         {(['all', 'active', 'draft', 'archived'] as const).map((status) => (

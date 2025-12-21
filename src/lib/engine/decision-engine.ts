@@ -3,12 +3,10 @@ import {
   Decision,
   DecisionOutcome,
   FlightData,
-  Product,
-  ProductConfig,
   TraceStep,
 } from './types';
 import { getFlightData } from '@/lib/data/flights';
-import { getProductById } from '@/lib/data/products';
+import { getProductById } from '@/lib/data/product-store';
 
 function generateId(): string {
   return Math.random().toString(36).substring(2, 11);
