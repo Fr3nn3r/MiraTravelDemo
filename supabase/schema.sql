@@ -99,61 +99,7 @@ CREATE TRIGGER products_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at();
 
--- Seed initial product (matches current mock data)
-INSERT INTO products (id, name, description, status, active_version)
-VALUES (
-  'prod-eu-delay',
-  'EU Flight Delay Standard',
-  'Standard flight delay coverage for EU flights with tiered payouts',
-  'active',
-  'v1.2'
-) ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO product_versions (product_id, version, hash, status, config, published_at)
-VALUES (
-  'prod-eu-delay',
-  'v1.2',
-  'a1b2c3d4',
-  'published',
-  '{
-    "eligibility": {
-      "claimWindowHours": 72
-    },
-    "payoutTiers": [
-      {"id": "tier-1", "minDelayMinutes": 60, "maxDelayMinutes": 120, "payoutUSD": 50},
-      {"id": "tier-2", "minDelayMinutes": 121, "maxDelayMinutes": 240, "payoutUSD": 175},
-      {"id": "tier-3", "minDelayMinutes": 241, "maxDelayMinutes": 480, "payoutUSD": 350},
-      {"id": "tier-4", "minDelayMinutes": 481, "maxDelayMinutes": null, "payoutUSD": 600}
-    ],
-    "exclusions": [
-      {"id": "excl-1", "name": "Force Majeure", "description": "Natural disasters, war, terrorism", "enabled": true},
-      {"id": "excl-2", "name": "Acts of God", "description": "Extreme weather events beyond carrier control", "enabled": true}
-    ]
-  }'::jsonb,
-  NOW()
-) ON CONFLICT (product_id, version) DO NOTHING;
-
--- Add v1.1 for version comparison demo
-INSERT INTO product_versions (product_id, version, hash, status, config, published_at)
-VALUES (
-  'prod-eu-delay',
-  'v1.1',
-  'e5f6g7h8',
-  'published',
-  '{
-    "eligibility": {
-      "claimWindowHours": 48
-    },
-    "payoutTiers": [
-      {"id": "tier-1", "minDelayMinutes": 60, "maxDelayMinutes": 120, "payoutUSD": 50},
-      {"id": "tier-2", "minDelayMinutes": 121, "maxDelayMinutes": 240, "payoutUSD": 150},
-      {"id": "tier-3", "minDelayMinutes": 241, "maxDelayMinutes": 480, "payoutUSD": 300},
-      {"id": "tier-4", "minDelayMinutes": 481, "maxDelayMinutes": null, "payoutUSD": 500}
-    ],
-    "exclusions": [
-      {"id": "excl-1", "name": "Force Majeure", "description": "Natural disasters, war, terrorism", "enabled": true},
-      {"id": "excl-2", "name": "Acts of God", "description": "Extreme weather events beyond carrier control", "enabled": false}
-    ]
-  }'::jsonb,
-  NOW() - INTERVAL '7 days'
-) ON CONFLICT (product_id, version) DO NOTHING;
+-- Seed data is in a separate file: supabase/seed.sql
+-- Run schema first, then seed:
+--   1. Run this file (schema.sql) to create tables
+--   2. Run seed.sql to populate with sample data
