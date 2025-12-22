@@ -6,15 +6,27 @@ This backlog captures all features, improvements, and technical debt items beyon
 
 ---
 
+## Recently Completed (December 2024)
+
+**Supabase Integration (PR #1)**
+- [x] P1-P5: Full persistence layer with Supabase PostgreSQL
+- [x] X2-X5: Preview deployments, E2E tests, environment configs, secrets management
+- [x] Dual-environment setup: Production (MiraCenter-Prod) + Dev/Preview (MiraCenter)
+- [x] Database schema: products, product_versions, decisions, audit_log tables
+- [x] Row-level security (RLS) policies for all tables
+- [x] Seed data for 3 products (EU, US, APAC) with 4 versions
+
+---
+
 ## 1. Persistence Layer
 
-| ID | Item | Description | Effort |
-|----|------|-------------|--------|
-| P1 | Database setup | PostgreSQL/Supabase for structured data | M |
-| P2 | Product persistence | Store products, versions, configs in DB | M |
-| P3 | Decision persistence | Store all decisions with full trace | M |
-| P4 | Audit log storage | Immutable append-only audit trail | M |
-| P5 | Migration system | Schema versioning (Prisma/Drizzle) | S |
+| ID | Item | Description | Effort | Status |
+|----|------|-------------|--------|--------|
+| P1 | Database setup | PostgreSQL/Supabase for structured data | M | [DONE] |
+| P2 | Product persistence | Store products, versions, configs in DB | M | [DONE] |
+| P3 | Decision persistence | Store all decisions with full trace | M | [DONE] |
+| P4 | Audit log storage | Immutable append-only audit trail | M | [DONE] |
+| P5 | Migration system | Schema versioning (Supabase migrations) | S | [DONE] |
 
 ---
 
@@ -151,15 +163,15 @@ This backlog captures all features, improvements, and technical debt items beyon
 
 ## 12. DevOps & Infrastructure
 
-| ID | Item | Description | Effort |
-|----|------|-------------|--------|
-| X1 | CI/CD pipeline | GitHub Actions for test + deploy | M |
-| X2 | Preview deployments | Auto-deploy PRs to preview URLs | S |
-| X3 | E2E in CI | Run Playwright tests on every PR | S |
-| X4 | Environment configs | Dev, staging, prod configurations | S |
-| X5 | Secrets management | Secure API keys, DB credentials | S |
-| X6 | Database backups | Automated backup strategy | M |
-| X7 | CDN/caching | Static asset optimization | S |
+| ID | Item | Description | Effort | Status |
+|----|------|-------------|--------|--------|
+| X1 | CI/CD pipeline | GitHub Actions for test + deploy | M | |
+| X2 | Preview deployments | Auto-deploy PRs to preview URLs (Vercel) | S | [DONE] |
+| X3 | E2E tests | Playwright E2E smoke tests | S | [DONE] |
+| X4 | Environment configs | Dev/preview + prod Supabase environments | S | [DONE] |
+| X5 | Secrets management | Vercel env vars per environment | S | [DONE] |
+| X6 | Database backups | Automated backup strategy | M | |
+| X7 | CDN/caching | Static asset optimization | S | |
 
 ---
 
@@ -190,13 +202,13 @@ This backlog captures all features, improvements, and technical debt items beyon
 **Tier 1 - Demo Hardening (before design partner pilots)**
 - F1, F2 (more flight scenarios)
 - E1-E4 (error handling basics)
-- P1-P3 (persistence)
+- ~~P1-P5 (persistence)~~ [DONE - Supabase integration complete]
 
 **Tier 2 - Production Readiness**
 - A1-A3 (auth)
 - O1-O4 (observability)
 - R1, R3, R7 (API basics)
-- X1-X3 (CI/CD)
+- X1 (CI/CD pipeline) - ~~X2-X5~~ [DONE]
 
 **Tier 3 - Scale & Compliance**
 - C1-C5 (compliance)
