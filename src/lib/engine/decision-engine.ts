@@ -52,8 +52,32 @@ export async function evaluateClaimDecision(claim: ClaimInput): Promise<Decision
 
   // Get the specific version config
   const version = product.versions.find((v) => v.version === claim.productVersion);
-  const config = version?.config || product.versions[0].config;
-  const productHash = version?.hash || 'unknown';
+
+  if (!version) {
+    const availableVersions = product.versions.map((v) => v.version).join(', ');
+    trace.push(
+      createTraceStep(
+        'PRODUCT_VALIDATION',
+        'Verify product exists and is active',
+        { productId: claim.productId, version: claim.productVersion, status: product.status },
+        'pass',
+        `Product "${product.name}" found`
+      )
+    );
+    trace.push(
+      createTraceStep(
+        'VERSION_VALIDATION',
+        'Verify requested product version exists',
+        { requestedVersion: claim.productVersion, availableVersions: product.versions.map((v) => v.version) },
+        'fail',
+        `Version ${claim.productVersion} not found. Available versions: ${availableVersions}`
+      )
+    );
+    return buildDecision(claim, 'denied', 0, ['DENIED_INVALID_VERSION'], trace, null);
+  }
+
+  const config = version.config;
+  const productHash = version.hash;
 
   trace.push(
     createTraceStep(
@@ -65,21 +89,8 @@ export async function evaluateClaimDecision(claim: ClaimInput): Promise<Decision
     )
   );
 
-  // Step 2: Fetch flight data
+  // Step 2: Fetch flight data (always returns data - mock or generated)
   const flightData = getFlightData(claim.flightNo, claim.flightDate);
-  if (!flightData) {
-    trace.push(
-      createTraceStep(
-        'FLIGHT_DATA_FETCH',
-        'Retrieve flight status from data source',
-        { flightNo: claim.flightNo, flightDate: claim.flightDate, dataSource: config.dataSource.provider },
-        'fail',
-        `Flight ${claim.flightNo} on ${claim.flightDate} not found in ${config.dataSource.provider}`
-      )
-    );
-    reasonCodes.push('DENIED_INVALID_FLIGHT');
-    return buildDecision(claim, 'denied', 0, reasonCodes, trace, null, productHash);
-  }
 
   trace.push(
     createTraceStep(

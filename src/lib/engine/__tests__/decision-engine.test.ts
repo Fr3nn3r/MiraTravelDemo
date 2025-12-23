@@ -47,26 +47,29 @@ describe('Decision Engine', () => {
   });
 
   describe('Flight Data Fetch', () => {
-    it('should deny claim for non-existent flight', async () => {
+    it('should generate flight data for unknown flights', async () => {
+      // Unknown flights are now generated deterministically
       const claim: ClaimInput = {
         ...baseClaimInput,
-        flightNo: 'INVALID-999',
-        flightDate: '2099-01-01',
+        flightNo: 'XX999',
+        flightDate: '2024-12-20',
       };
 
       const decision = await evaluateClaimDecision(claim);
 
-      expect(decision.outcome).toBe('denied');
-      expect(decision.reasonCodes).toContain('DENIED_INVALID_FLIGHT');
-      expect(decision.trace.some(t => t.rule === 'FLIGHT_DATA_FETCH' && t.result === 'fail')).toBe(true);
+      // Should process - flight data is generated
+      expect(decision.flightData.flightNo).toBe('XX999');
+      const flightFetchStep = decision.trace.find(t => t.rule === 'FLIGHT_DATA_FETCH');
+      expect(flightFetchStep?.result).toBe('pass');
     });
 
-    it('should fetch flight data for valid flight', async () => {
+    it('should fetch flight data for known flight', async () => {
       const decision = await evaluateClaimDecision(baseClaimInput);
 
       const flightFetchStep = decision.trace.find(t => t.rule === 'FLIGHT_DATA_FETCH');
       expect(flightFetchStep?.result).toBe('pass');
       expect(decision.flightData.flightNo).toBe('BA123');
+      expect(decision.flightData.delayMinutes).toBe(150); // Known mock data
     });
   });
 
@@ -153,8 +156,8 @@ describe('Decision Engine', () => {
     it('should approve claim with tier 1 payout (60-120 min delay)', async () => {
       const claim: ClaimInput = {
         ...baseClaimInput,
-        flightNo: 'AF789', // 75 minutes delay
-        flightDate: '2024-12-19',
+        flightNo: 'AF101', // 105 minutes delay (Tier 1)
+        flightDate: '2024-12-21',
       };
 
       const decision = await evaluateClaimDecision(claim);
@@ -254,7 +257,7 @@ describe('Decision Engine', () => {
       expect(decision.payoutAmountUSD).toBe(150);
     });
 
-    it('should fallback to first version if specified version not found', async () => {
+    it('should deny claim if specified version not found', async () => {
       const claimBadVersion: ClaimInput = {
         ...baseClaimInput,
         productVersion: 'v99.99', // Non-existent version
@@ -262,8 +265,10 @@ describe('Decision Engine', () => {
 
       const decision = await evaluateClaimDecision(claimBadVersion);
 
-      // Should use v1.2 (first in versions array) which has tier 2 at 175
-      expect(decision.payoutAmountUSD).toBe(175);
+      // Should deny with DENIED_INVALID_VERSION
+      expect(decision.outcome).toBe('denied');
+      expect(decision.reasonCodes).toContain('DENIED_INVALID_VERSION');
+      expect(decision.trace.some(t => t.rule === 'VERSION_VALIDATION' && t.result === 'fail')).toBe(true);
     });
   });
 });

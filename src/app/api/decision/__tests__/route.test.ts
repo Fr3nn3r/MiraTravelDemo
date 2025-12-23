@@ -214,10 +214,27 @@ describe('Decision API', () => {
       expect(decision.reasonCodes).toContain('DENIED_INVALID_PRODUCT');
     });
 
-    it('should return denied for non-existent flight', async () => {
+    it('should return denied for non-existent product version', async () => {
       const claim: ClaimInput = {
         bookingRef: 'BK-TEST-009',
-        flightNo: 'INVALID999',
+        flightNo: 'BA123',
+        flightDate: '2024-12-20',
+        passengerToken: 'pax-test',
+        productId: 'prod-eu-delay',
+        productVersion: 'v99.0',
+      };
+
+      const decision = await evaluateClaimDecision(claim);
+
+      expect(decision.outcome).toBe('denied');
+      expect(decision.reasonCodes).toContain('DENIED_INVALID_VERSION');
+    });
+
+    it('should generate flight data for unknown flights', async () => {
+      // Unknown flights are now generated deterministically instead of returning error
+      const claim: ClaimInput = {
+        bookingRef: 'BK-TEST-010',
+        flightNo: 'XX999',
         flightDate: '2024-12-20',
         passengerToken: 'pax-test',
         productId: 'prod-eu-delay',
@@ -226,8 +243,12 @@ describe('Decision API', () => {
 
       const decision = await evaluateClaimDecision(claim);
 
-      expect(decision.outcome).toBe('denied');
-      expect(decision.reasonCodes).toContain('DENIED_INVALID_FLIGHT');
+      // Should process successfully (not denied for invalid flight)
+      expect(decision.flightData).toBeDefined();
+      expect(decision.flightData.flightNo).toBe('XX999');
+      expect(['approved', 'denied']).toContain(decision.outcome);
+      // Should NOT have DENIED_INVALID_FLIGHT
+      expect(decision.reasonCodes).not.toContain('DENIED_INVALID_FLIGHT');
     });
   });
 
@@ -235,7 +256,7 @@ describe('Decision API', () => {
     it('should match correct payout tier based on delay', async () => {
       // BA123 has a 150 minute delay -> Tier 2 (121-240 min) -> $175 (v1.2 config)
       const claim: ClaimInput = {
-        bookingRef: 'BK-TEST-010',
+        bookingRef: 'BK-TEST-011',
         flightNo: 'BA123',
         flightDate: '2024-12-20',
         passengerToken: 'pax-test',
@@ -252,7 +273,7 @@ describe('Decision API', () => {
     it('should approve higher tier for longer delay', async () => {
       // LH456 has a 390 minute delay -> Tier 3 (241-480 min) -> $350 (v1.2 config)
       const claim: ClaimInput = {
-        bookingRef: 'BK-TEST-011',
+        bookingRef: 'BK-TEST-012',
         flightNo: 'LH456',
         flightDate: '2024-12-20',
         passengerToken: 'pax-test',

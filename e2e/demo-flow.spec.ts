@@ -114,3 +114,102 @@ test.describe('Demo Flow Smoke Tests', () => {
     await expect(page.getByTestId('api-demo-heading')).toBeVisible();
   });
 });
+
+test.describe('API Validation Tests', () => {
+  test('API returns error for invalid flight number format', async ({ request }) => {
+    const response = await request.post('/api/decision', {
+      data: {
+        bookingRef: 'BK-12345',
+        flightNo: 'invalid', // Invalid: should be 2-3 letters + 1-4 digits
+        flightDate: '2024-12-20',
+        passengerToken: 'pax-abc123',
+        productId: 'prod-eu-delay',
+        productVersion: 'v1.2',
+      },
+    });
+
+    expect(response.status()).toBe(400);
+    const body = await response.json();
+    expect(body.success).toBe(false);
+    expect(body.errorCode).toBe('INVALID_FLIGHT_NO');
+  });
+
+  test('API returns error for invalid date format', async ({ request }) => {
+    const response = await request.post('/api/decision', {
+      data: {
+        bookingRef: 'BK-12345',
+        flightNo: 'BA123',
+        flightDate: '12-20-2024', // Invalid: should be YYYY-MM-DD
+        passengerToken: 'pax-abc123',
+        productId: 'prod-eu-delay',
+        productVersion: 'v1.2',
+      },
+    });
+
+    expect(response.status()).toBe(400);
+    const body = await response.json();
+    expect(body.success).toBe(false);
+    expect(body.errorCode).toBe('INVALID_DATE_FORMAT');
+  });
+
+  test('API returns error for invalid version format', async ({ request }) => {
+    const response = await request.post('/api/decision', {
+      data: {
+        bookingRef: 'BK-12345',
+        flightNo: 'BA123',
+        flightDate: '2024-12-20',
+        passengerToken: 'pax-abc123',
+        productId: 'prod-eu-delay',
+        productVersion: '1.2', // Invalid: should start with 'v'
+      },
+    });
+
+    expect(response.status()).toBe(400);
+    const body = await response.json();
+    expect(body.success).toBe(false);
+    expect(body.errorCode).toBe('INVALID_VERSION_FORMAT');
+  });
+
+  test('API handles unknown flight with dynamic generation', async ({ request }) => {
+    const response = await request.post('/api/decision', {
+      data: {
+        bookingRef: 'BK-12345',
+        flightNo: 'ZZ999', // Unknown flight - should be generated
+        flightDate: '2024-12-20',
+        passengerToken: 'pax-abc123',
+        productId: 'prod-eu-delay',
+        productVersion: 'v1.2',
+      },
+    });
+
+    expect(response.status()).toBe(200);
+    const body = await response.json();
+    expect(body.success).toBe(true);
+    // Should have flight data (generated)
+    expect(body.flightData.flightNo).toBe('ZZ999');
+    // Should have a valid decision
+    expect(['approved', 'denied']).toContain(body.decision.outcome);
+  });
+
+  test('API returns consistent results for same flight (deterministic)', async ({ request }) => {
+    const payload = {
+      bookingRef: 'BK-DETER-001',
+      flightNo: 'XX123',
+      flightDate: '2024-12-20',
+      passengerToken: 'pax-test',
+      productId: 'prod-eu-delay',
+      productVersion: 'v1.2',
+    };
+
+    const response1 = await request.post('/api/decision', { data: payload });
+    const response2 = await request.post('/api/decision', { data: payload });
+
+    const body1 = await response1.json();
+    const body2 = await response2.json();
+
+    // Same flight should produce same delay/outcome
+    expect(body1.flightData.delayMinutes).toBe(body2.flightData.delayMinutes);
+    expect(body1.decision.outcome).toBe(body2.decision.outcome);
+    expect(body1.decision.payoutAmountUSD).toBe(body2.decision.payoutAmountUSD);
+  });
+});
