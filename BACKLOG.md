@@ -8,6 +8,14 @@ This backlog captures all features, improvements, and technical debt items beyon
 
 ## Recently Completed (December 2024)
 
+**Tier 1: Demo Hardening (PR #2)**
+- [x] F1: Expanded mock flights to 27 (EU, US, APAC regions, all delay tiers)
+- [x] F2: Deterministic flight generator for any flight number
+- [x] E1: Enhanced input validation (flight format, date, version format)
+- [x] E2-E3: Graceful handling for unknown flights (dynamic generation)
+- [x] E4: Explicit version validation with DENIED_INVALID_VERSION
+- [x] 5 new E2E API validation tests
+
 **Supabase Integration (PR #1)**
 - [x] P1-P5: Full persistence layer with Supabase PostgreSQL
 - [x] X2-X5: Preview deployments, E2E tests, environment configs, secrets management
@@ -32,13 +40,13 @@ This backlog captures all features, improvements, and technical debt items beyon
 
 ## 2. Flight Data
 
-| ID | Item | Description | Effort |
-|----|------|-------------|--------|
-| F1 | Expand mock flights | 20+ realistic flight scenarios | S |
-| F2 | Dynamic flight generator | Generate random delays for any flight number | S |
-| F3 | External flight API | Integrate real provider (FlightAware, AeroAPI) | L |
-| F4 | Flight API fallback | Graceful degradation when API unavailable | M |
-| F5 | Historical flight cache | Store past lookups for consistency | M |
+| ID | Item | Description | Effort | Status |
+|----|------|-------------|--------|--------|
+| F1 | Expand mock flights | 20+ realistic flight scenarios | S | [DONE] |
+| F2 | Dynamic flight generator | Generate random delays for any flight number | S | [DONE] |
+| F3 | External flight API | Integrate real provider (FlightAware, AeroAPI) | L | |
+| F4 | Flight API fallback | Graceful degradation when API unavailable | M | |
+| F5 | Historical flight cache | Store past lookups for consistency | M | |
 
 ---
 
@@ -71,15 +79,15 @@ This backlog captures all features, improvements, and technical debt items beyon
 
 ## 5. Error Handling & Edge Cases
 
-| ID | Item | Description | Effort |
-|----|------|-------------|--------|
-| E1 | Input validation | Comprehensive request validation with clear errors | S |
-| E2 | Flight not found | Graceful handling when flight doesn't exist | S |
-| E3 | Product not found | Clear error when product ID invalid | S |
-| E4 | Version mismatch | Handle requests for non-existent versions | S |
-| E5 | Timeout handling | Timeouts for external API calls | S |
-| E6 | Circuit breaker | Prevent cascade failures | M |
-| E7 | Retry logic | Automatic retry with backoff | S |
+| ID | Item | Description | Effort | Status |
+|----|------|-------------|--------|--------|
+| E1 | Input validation | Comprehensive request validation with clear errors | S | [DONE] |
+| E2 | Flight not found | Graceful handling when flight doesn't exist | S | [DONE] |
+| E3 | Product not found | Clear error when product ID invalid | S | [DONE] |
+| E4 | Version mismatch | Handle requests for non-existent versions | S | [DONE] |
+| E5 | Timeout handling | Timeouts for external API calls | S | |
+| E6 | Circuit breaker | Prevent cascade failures | M | |
+| E7 | Retry logic | Automatic retry with backoff | S | |
 
 ---
 
@@ -199,10 +207,10 @@ This backlog captures all features, improvements, and technical debt items beyon
 
 ## Suggested Priority Tiers
 
-**Tier 1 - Demo Hardening (before design partner pilots)**
-- F1, F2 (more flight scenarios)
-- E1-E4 (error handling basics)
-- ~~P1-P5 (persistence)~~ [DONE - Supabase integration complete]
+**Tier 1 - Demo Hardening (before design partner pilots)** [COMPLETE]
+- ~~F1, F2 (more flight scenarios)~~ [DONE - PR #2]
+- ~~E1-E4 (error handling basics)~~ [DONE - PR #2]
+- ~~P1-P5 (persistence)~~ [DONE - PR #1]
 
 **Tier 2 - Production Readiness**
 - A1-A3 (auth)
