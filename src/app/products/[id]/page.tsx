@@ -3,7 +3,6 @@
 import { use, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { getProductById, createNewVersion } from '@/lib/data/product-store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -171,17 +170,36 @@ export default function ProductDetailPage({
 }) {
   const { id } = use(params);
   const router = useRouter();
-  const product = getProductById(id);
-
+  const [product, setProduct] = useState<Product | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [config, setConfig] = useState<ProductConfig | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    if (product) {
-      const activeVersion = product.versions.find((v) => v.version === product.activeVersion);
-      setConfig(activeVersion?.config || product.versions[0].config);
+    async function fetchProduct() {
+      try {
+        const res = await fetch(`/api/products/${id}`);
+        const data = await res.json();
+        if (data.success && data.product) {
+          setProduct(data.product);
+          const activeVersion = data.product.versions.find(
+            (v: { version: string }) => v.version === data.product.activeVersion
+          );
+          setConfig(activeVersion?.config || data.product.versions[0]?.config);
+        }
+      } catch (error) {
+        console.error('Error fetching product:', error);
+      } finally {
+        setIsLoading(false);
+      }
     }
-  }, [product]);
+    fetchProduct();
+  }, [id]);
+
+  if (isLoading) {
+    return <div className="text-center py-12">Loading...</div>;
+  }
 
   if (!product) {
     return (
@@ -195,7 +213,7 @@ export default function ProductDetailPage({
   }
 
   if (!config) {
-    return <div>Loading...</div>;
+    return <div>Loading configuration...</div>;
   }
 
   const activeVersion = product.versions.find((v) => v.version === product.activeVersion);
@@ -205,23 +223,47 @@ export default function ProductDetailPage({
     setHasChanges(true);
   };
 
-  const handleSaveDraft = () => {
+  const handleSaveDraft = async () => {
     if (!config) return;
-    const newVersion = createNewVersion(id, config, false);
-    if (newVersion) {
-      alert(`Draft saved as ${newVersion.version} (${newVersion.hash})`);
-      setHasChanges(false);
-      router.refresh();
+    setIsSaving(true);
+    try {
+      const res = await fetch(`/api/products/${id}/versions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ config, publish: false }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(`Draft saved as ${data.version.version} (${data.version.hash})`);
+        setHasChanges(false);
+        router.refresh();
+      }
+    } catch (error) {
+      console.error('Error saving draft:', error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     if (!config) return;
-    const newVersion = createNewVersion(id, config, true);
-    if (newVersion) {
-      alert(`Published as ${newVersion.version} (${newVersion.hash})`);
-      setHasChanges(false);
-      router.refresh();
+    setIsSaving(true);
+    try {
+      const res = await fetch(`/api/products/${id}/versions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ config, publish: true }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(`Published as ${data.version.version} (${data.version.hash})`);
+        setHasChanges(false);
+        router.refresh();
+      }
+    } catch (error) {
+      console.error('Error publishing:', error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -482,11 +524,11 @@ export default function ProductDetailPage({
               <Button variant="outline" onClick={() => setHasChanges(false)}>
                 Discard
               </Button>
-              <Button variant="outline" onClick={handleSaveDraft}>
-                Save Draft
+              <Button variant="outline" onClick={handleSaveDraft} disabled={isSaving}>
+                {isSaving ? 'Saving...' : 'Save Draft'}
               </Button>
-              <Button onClick={handlePublish}>
-                Publish New Version
+              <Button onClick={handlePublish} disabled={isSaving}>
+                {isSaving ? 'Publishing...' : 'Publish New Version'}
               </Button>
             </div>
           </div>

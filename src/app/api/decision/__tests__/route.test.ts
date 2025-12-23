@@ -66,7 +66,7 @@ describe('Decision API', () => {
   });
 
   describe('Decision Processing', () => {
-    it('should return approved decision for valid delayed flight', () => {
+    it('should return approved decision for valid delayed flight', async () => {
       const claim: ClaimInput = {
         bookingRef: 'BK-TEST-001',
         flightNo: 'BA123',
@@ -76,7 +76,7 @@ describe('Decision API', () => {
         productVersion: 'v1.2',
       };
 
-      const decision = evaluateClaimDecision(claim);
+      const decision = await evaluateClaimDecision(claim);
 
       expect(decision.outcome).toBe('approved');
       expect(decision.payoutAmountUSD).toBeGreaterThan(0);
@@ -84,7 +84,7 @@ describe('Decision API', () => {
       expect(decision.trace.length).toBeGreaterThan(0);
     });
 
-    it('should return denied decision for excluded delay reason', () => {
+    it('should return denied decision for excluded delay reason', async () => {
       // DL300 has force_majeure delay reason which is excluded by default
       const claim: ClaimInput = {
         bookingRef: 'BK-TEST-002',
@@ -95,14 +95,14 @@ describe('Decision API', () => {
         productVersion: 'v1.2',
       };
 
-      const decision = evaluateClaimDecision(claim);
+      const decision = await evaluateClaimDecision(claim);
 
       expect(decision.outcome).toBe('denied');
       expect(decision.payoutAmountUSD).toBe(0);
       expect(decision.reasonCodes).toContain('DENIED_EXCLUSION');
     });
 
-    it('should include complete trace in response', () => {
+    it('should include complete trace in response', async () => {
       const claim: ClaimInput = {
         bookingRef: 'BK-TEST-003',
         flightNo: 'BA123',
@@ -112,7 +112,7 @@ describe('Decision API', () => {
         productVersion: 'v1.2',
       };
 
-      const decision = evaluateClaimDecision(claim);
+      const decision = await evaluateClaimDecision(claim);
 
       expect(decision.trace).toBeDefined();
       expect(decision.trace.length).toBeGreaterThanOrEqual(3);
@@ -127,7 +127,7 @@ describe('Decision API', () => {
       });
     });
 
-    it('should include flight data in response', () => {
+    it('should include flight data in response', async () => {
       const claim: ClaimInput = {
         bookingRef: 'BK-TEST-004',
         flightNo: 'BA123',
@@ -137,7 +137,7 @@ describe('Decision API', () => {
         productVersion: 'v1.2',
       };
 
-      const decision = evaluateClaimDecision(claim);
+      const decision = await evaluateClaimDecision(claim);
 
       expect(decision.flightData).toBeDefined();
       expect(decision.flightData.flightNo).toBe('BA123');
@@ -146,7 +146,7 @@ describe('Decision API', () => {
       expect(decision.flightData).toHaveProperty('delayReason');
     });
 
-    it('should include product hash for audit trail', () => {
+    it('should include product hash for audit trail', async () => {
       const claim: ClaimInput = {
         bookingRef: 'BK-TEST-005',
         flightNo: 'BA123',
@@ -156,13 +156,13 @@ describe('Decision API', () => {
         productVersion: 'v1.2',
       };
 
-      const decision = evaluateClaimDecision(claim);
+      const decision = await evaluateClaimDecision(claim);
 
       expect(decision.productHash).toBeDefined();
       expect(decision.productHash.length).toBeGreaterThan(0);
     });
 
-    it('should generate unique decision IDs', () => {
+    it('should generate unique decision IDs', async () => {
       const claim: ClaimInput = {
         bookingRef: 'BK-TEST-006',
         flightNo: 'BA123',
@@ -172,15 +172,15 @@ describe('Decision API', () => {
         productVersion: 'v1.2',
       };
 
-      const decision1 = evaluateClaimDecision(claim);
-      const decision2 = evaluateClaimDecision(claim);
+      const decision1 = await evaluateClaimDecision(claim);
+      const decision2 = await evaluateClaimDecision(claim);
 
       expect(decision1.id).not.toBe(decision2.id);
       expect(decision1.id).toMatch(/^DEC-/);
       expect(decision2.id).toMatch(/^DEC-/);
     });
 
-    it('should include ISO timestamp', () => {
+    it('should include ISO timestamp', async () => {
       const claim: ClaimInput = {
         bookingRef: 'BK-TEST-007',
         flightNo: 'BA123',
@@ -190,7 +190,7 @@ describe('Decision API', () => {
         productVersion: 'v1.2',
       };
 
-      const decision = evaluateClaimDecision(claim);
+      const decision = await evaluateClaimDecision(claim);
 
       expect(decision.timestamp).toBeDefined();
       expect(new Date(decision.timestamp).toISOString()).toBe(decision.timestamp);
@@ -198,7 +198,7 @@ describe('Decision API', () => {
   });
 
   describe('Error Handling', () => {
-    it('should return denied for non-existent product', () => {
+    it('should return denied for non-existent product', async () => {
       const claim: ClaimInput = {
         bookingRef: 'BK-TEST-008',
         flightNo: 'BA123',
@@ -208,13 +208,13 @@ describe('Decision API', () => {
         productVersion: 'v1.0',
       };
 
-      const decision = evaluateClaimDecision(claim);
+      const decision = await evaluateClaimDecision(claim);
 
       expect(decision.outcome).toBe('denied');
       expect(decision.reasonCodes).toContain('DENIED_INVALID_PRODUCT');
     });
 
-    it('should return denied for non-existent flight', () => {
+    it('should return denied for non-existent flight', async () => {
       const claim: ClaimInput = {
         bookingRef: 'BK-TEST-009',
         flightNo: 'INVALID999',
@@ -224,7 +224,7 @@ describe('Decision API', () => {
         productVersion: 'v1.2',
       };
 
-      const decision = evaluateClaimDecision(claim);
+      const decision = await evaluateClaimDecision(claim);
 
       expect(decision.outcome).toBe('denied');
       expect(decision.reasonCodes).toContain('DENIED_INVALID_FLIGHT');
@@ -232,7 +232,7 @@ describe('Decision API', () => {
   });
 
   describe('Payout Tiers', () => {
-    it('should match correct payout tier based on delay', () => {
+    it('should match correct payout tier based on delay', async () => {
       // BA123 has a 150 minute delay -> Tier 2 (121-240 min) -> $175 (v1.2 config)
       const claim: ClaimInput = {
         bookingRef: 'BK-TEST-010',
@@ -243,13 +243,13 @@ describe('Decision API', () => {
         productVersion: 'v1.2',
       };
 
-      const decision = evaluateClaimDecision(claim);
+      const decision = await evaluateClaimDecision(claim);
 
       expect(decision.outcome).toBe('approved');
       expect(decision.payoutAmountUSD).toBe(175);
     });
 
-    it('should approve higher tier for longer delay', () => {
+    it('should approve higher tier for longer delay', async () => {
       // LH456 has a 390 minute delay -> Tier 3 (241-480 min) -> $350 (v1.2 config)
       const claim: ClaimInput = {
         bookingRef: 'BK-TEST-011',
@@ -260,7 +260,7 @@ describe('Decision API', () => {
         productVersion: 'v1.2',
       };
 
-      const decision = evaluateClaimDecision(claim);
+      const decision = await evaluateClaimDecision(claim);
 
       expect(decision.outcome).toBe('approved');
       expect(decision.payoutAmountUSD).toBe(350);
