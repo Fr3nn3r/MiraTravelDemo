@@ -37,11 +37,12 @@ export interface DecisionAPIResponse {
   };
   processingTimeMs: number;
   error?: string;
+  errorCode?: string;
 }
 
-function validateRequest(body: unknown): { valid: true; data: DecisionAPIRequest } | { valid: false; error: string } {
+function validateRequest(body: unknown): { valid: true; data: DecisionAPIRequest } | { valid: false; error: string; code: string } {
   if (!body || typeof body !== 'object') {
-    return { valid: false, error: 'Request body must be a JSON object' };
+    return { valid: false, error: 'Request body must be a JSON object', code: 'INVALID_BODY' };
   }
 
   const data = body as Record<string, unknown>;
@@ -49,25 +50,60 @@ function validateRequest(body: unknown): { valid: true; data: DecisionAPIRequest
 
   for (const field of requiredFields) {
     if (!data[field] || typeof data[field] !== 'string') {
-      return { valid: false, error: `Missing or invalid required field: ${field}` };
+      return { valid: false, error: `Missing or invalid required field: ${field}`, code: 'MISSING_FIELD' };
     }
   }
 
+  // Validate booking reference (non-empty, reasonable length)
+  const bookingRef = data.bookingRef as string;
+  if (bookingRef.length < 2 || bookingRef.length > 20) {
+    return { valid: false, error: 'bookingRef must be 2-20 characters', code: 'INVALID_BOOKING_REF' };
+  }
+
+  // Validate flight number format: 2-3 letter carrier code + 1-4 digit flight number
+  const flightNo = data.flightNo as string;
+  const flightNoRegex = /^[A-Z]{2,3}\d{1,4}$/;
+  if (!flightNoRegex.test(flightNo)) {
+    return { valid: false, error: 'flightNo must be 2-3 letter carrier code + 1-4 digit number (e.g., BA123, UAL1234)', code: 'INVALID_FLIGHT_NO' };
+  }
+
   // Validate flight date format (YYYY-MM-DD)
+  const flightDate = data.flightDate as string;
   const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-  if (!dateRegex.test(data.flightDate as string)) {
-    return { valid: false, error: 'flightDate must be in YYYY-MM-DD format' };
+  if (!dateRegex.test(flightDate)) {
+    return { valid: false, error: 'flightDate must be in YYYY-MM-DD format', code: 'INVALID_DATE_FORMAT' };
+  }
+
+  // Validate date is a valid date (lenient for demo purposes)
+  const dateObj = new Date(flightDate);
+
+  if (isNaN(dateObj.getTime())) {
+    return { valid: false, error: 'flightDate is not a valid date', code: 'INVALID_DATE' };
+  }
+
+  // Only reject dates more than 1 year in the future (allow historical dates for demos)
+  const oneYearFromNow = new Date();
+  oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+  if (dateObj > oneYearFromNow) {
+    return { valid: false, error: 'flightDate cannot be more than 1 year in the future', code: 'FUTURE_DATE' };
+  }
+
+  // Validate product version format (e.g., v1.0, v1.2.3)
+  const productVersion = data.productVersion as string;
+  const versionRegex = /^v\d+(\.\d+)*$/;
+  if (!versionRegex.test(productVersion)) {
+    return { valid: false, error: 'productVersion must be in format vX.Y (e.g., v1.0, v1.2)', code: 'INVALID_VERSION_FORMAT' };
   }
 
   return {
     valid: true,
     data: {
-      bookingRef: data.bookingRef as string,
-      flightNo: data.flightNo as string,
-      flightDate: data.flightDate as string,
+      bookingRef: bookingRef,
+      flightNo: flightNo,
+      flightDate: flightDate,
       passengerToken: data.passengerToken as string,
       productId: data.productId as string,
-      productVersion: data.productVersion as string,
+      productVersion: productVersion,
     }
   };
 }
@@ -84,6 +120,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<DecisionA
         {
           success: false,
           error: validation.error,
+          errorCode: validation.code,
           processingTimeMs: Math.round(performance.now() - startTime),
         },
         { status: 400 }

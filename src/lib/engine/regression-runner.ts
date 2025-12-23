@@ -34,11 +34,11 @@ export const flightDelayTestPack: RegressionTestPack = {
     // Tier 1 approvals (60-120 min delay)
     {
       id: 'test-tier1-approve',
-      name: 'Tier 1 Approval - 75 min delay',
+      name: 'Tier 1 Approval - 105 min delay',
       claimInput: {
         bookingRef: 'TEST-T1-001',
-        flightNo: 'AF789',
-        flightDate: '2024-12-19',
+        flightNo: 'AF101',
+        flightDate: '2024-12-21',
         passengerToken: 'pax-test-1',
         productId: 'prod-eu-delay',
         productVersion: 'v1.2',
@@ -151,17 +151,17 @@ export const flightDelayTestPack: RegressionTestPack = {
       expectedOutcome: 'approved',
       expectedPayout: 175,
     },
-    // Invalid flight
+    // Invalid version
     {
-      id: 'test-deny-invalid-flight',
-      name: 'Denial - Invalid flight number',
+      id: 'test-deny-invalid-version',
+      name: 'Denial - Invalid product version',
       claimInput: {
         bookingRef: 'TEST-DENY-004',
-        flightNo: 'INVALID999',
+        flightNo: 'BA123',
         flightDate: '2024-12-20',
         passengerToken: 'pax-test-9',
         productId: 'prod-eu-delay',
-        productVersion: 'v1.2',
+        productVersion: 'v99.0',
       },
       expectedOutcome: 'denied',
       expectedPayout: 0,
