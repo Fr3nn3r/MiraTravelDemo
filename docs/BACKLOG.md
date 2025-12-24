@@ -173,13 +173,14 @@ This backlog captures all features, improvements, and technical debt items beyon
 
 | ID | Item | Description | Effort | Status |
 |----|------|-------------|--------|--------|
-| X1 | CI/CD pipeline | GitHub Actions for test + deploy | M | |
+| X1 | CI/CD pipeline | GitHub Actions for test + deploy | M | [IN PROGRESS] |
 | X2 | Preview deployments | Auto-deploy PRs to preview URLs (Vercel) | S | [DONE] |
 | X3 | E2E tests | Playwright E2E smoke tests | S | [DONE] |
 | X4 | Environment configs | Dev/preview + prod Supabase environments | S | [DONE] |
 | X5 | Secrets management | Vercel env vars per environment | S | [DONE] |
 | X6 | Database backups | Automated backup strategy | M | |
 | X7 | CDN/caching | Static asset optimization | S | |
+| X8 | E2E CI Integration | Automate Playwright in GitHub Actions | M | |
 
 ---
 
