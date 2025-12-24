@@ -155,7 +155,7 @@ export default function ProductsPage() {
 
       {!isLoading && filteredProducts.length === 0 && (
         <div className="text-center py-12 text-muted-foreground">
-          No products found with status "{filter}"
+          No products found with status &quot;{filter}&quot;
         </div>
       )}
     </div>

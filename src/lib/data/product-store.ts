@@ -133,7 +133,7 @@ export function createNewVersion(
   // Calculate next version number
   const currentVersion = product.versions[0]?.version || 'v0.0';
   const versionMatch = currentVersion.match(/v(\d+)\.(\d+)/);
-  let major = parseInt(versionMatch?.[1] || '0');
+  const major = parseInt(versionMatch?.[1] || '0');
   let minor = parseInt(versionMatch?.[2] || '0');
 
   if (publish) {

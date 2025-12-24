@@ -52,3 +52,16 @@
 2. **Questions:** List unresolved ambiguities.
 3. **Execute:** Write code.
 4. **Verify:** Check against SOLID/SSOT/Testing requirements.
+
+## 6. Task Protocol
+**Source of Truth:** The `/tasks` directory.
+
+1.  **Start:**
+    - Find ticket in `/tasks/01_backlog/`.
+    - **Move** to `/tasks/02_active/`.
+    - **Branch** `feat/{id}-{short-desc}`.
+
+2.  **Finish:**
+    - verify `[x]` requirements.
+    - **Move** to `/tasks/03_done/`.
+    - **Commit** the move.

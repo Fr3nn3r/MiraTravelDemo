@@ -31,7 +31,6 @@ function createTraceStep(
 
 export async function evaluateClaimDecision(claim: ClaimInput): Promise<Decision> {
   const trace: TraceStep[] = [];
-  let outcome: DecisionOutcome = 'approved';
   let payoutAmountUSD = 0;
   const reasonCodes: string[] = [];
 

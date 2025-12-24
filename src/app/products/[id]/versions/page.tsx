@@ -179,7 +179,7 @@ export default function VersionsPage({
         <CardHeader>
           <CardTitle>Regression Test Pack</CardTitle>
           <CardDescription>
-            Run automated tests against this product's versions
+            Run automated tests against this product&apos;s versions
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

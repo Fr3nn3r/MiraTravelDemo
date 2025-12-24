@@ -480,7 +480,7 @@ export default function SimulatorPage() {
                   />
                 </svg>
                 <p className="text-lg font-medium">No decision yet</p>
-                <p className="text-sm">Enter claim details and click "Run Decision"</p>
+                <p className="text-sm">Enter claim details and click &quot;Run Decision&quot;</p>
               </div>
             </Card>
           )}
