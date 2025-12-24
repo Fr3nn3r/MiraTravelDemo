@@ -33,6 +33,13 @@
 - Types: `feat`, `fix`, `refactor`, `chore`, `docs`.
 - Example: `feat/T-101-user-auth`
 
+**Branch Safety Checklist (CRITICAL for parallel agents):**
+Before every commit, verify you're on the correct branch:
+1. Run `git branch --show-current`
+2. Verify branch name matches your ticket (e.g., `feat/T-003-*` for T-003 work)
+3. If on wrong branch, switch back: `git checkout feat/T-{YOUR_TICKET}-*`
+4. Never commit to another agent's branch
+
 **Commit Protocol:**
 - Atomic commits.
 - Format: `[T-101] feat: add login validation`
