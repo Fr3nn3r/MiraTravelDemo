@@ -28,7 +28,13 @@
       "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" pr view 2 --repo Fr3nn3r/MiraTravelDemo --json comments --jq '.comments[] | select\\(.author.login == \"\"vercel\"\"\\) | .body')",
       "Bash(npm i:*)",
       "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" run view 20486037213 --repo Fr3nn3r/MiraTravelDemo --log)",
-      "Bash(npm run lint)"
+      "Bash(npm run lint)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" run watch --repo Fr3nn3r/MiraTravelDemo --exit-status)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" run list --repo Fr3nn3r/MiraTravelDemo --limit 1 --json databaseId,status,conclusion,name -q '.[0]')",
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" run watch 20486200230 --repo Fr3nn3r/MiraTravelDemo --exit-status)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" run view 20486200230 --repo Fr3nn3r/MiraTravelDemo --log-failed)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" run list --repo Fr3nn3r/MiraTravelDemo --limit 1 --json databaseId,status -q '.[0].databaseId')",
+      "Bash(xargs:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
