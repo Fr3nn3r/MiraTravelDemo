@@ -69,6 +69,7 @@ export interface ClaimInput {
   passengerToken: string;
   productId: string;
   productVersion: string;
+  claimDate?: string; // Optional: defaults to current date if not provided
 }
 
 export interface FlightData {

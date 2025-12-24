@@ -292,7 +292,7 @@ export default function ProductDetailPage({
             {product.status}
           </Badge>
           <span className="text-sm text-muted-foreground">
-            v{product.activeVersion}
+            {product.activeVersion}
           </span>
           <span className="text-sm font-mono text-muted-foreground">
             ({activeVersion?.hash})
@@ -319,14 +319,14 @@ export default function ProductDetailPage({
         </Button>
       </div>
 
-      <Tabs defaultValue="preview" className="space-y-4">
+      <Tabs defaultValue="datasource" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="preview">Preview Rules</TabsTrigger>
-          <TabsTrigger value="tiers">Payout Tiers</TabsTrigger>
+          <TabsTrigger value="datasource">Data Source</TabsTrigger>
           <TabsTrigger value="eligibility">Eligibility</TabsTrigger>
           <TabsTrigger value="exclusions">Exclusions</TabsTrigger>
-          <TabsTrigger value="datasource">Data Source</TabsTrigger>
+          <TabsTrigger value="tiers">Payout Tiers</TabsTrigger>
           <TabsTrigger value="reasoncodes">Reason Codes</TabsTrigger>
+          <TabsTrigger value="preview">Preview Rules</TabsTrigger>
         </TabsList>
 
         <TabsContent value="preview">
@@ -514,26 +514,24 @@ export default function ProductDetailPage({
         </TabsContent>
       </Tabs>
 
-      {hasChanges && (
-        <div className="fixed bottom-0 left-64 right-0 p-4 bg-background border-t shadow-lg">
-          <div className="flex items-center justify-between max-w-4xl mx-auto">
-            <p className="text-sm text-muted-foreground">
-              You have unsaved changes
-            </p>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setHasChanges(false)}>
-                Discard
-              </Button>
-              <Button variant="outline" onClick={handleSaveDraft} disabled={isSaving}>
-                {isSaving ? 'Saving...' : 'Save Draft'}
-              </Button>
-              <Button onClick={handlePublish} disabled={isSaving}>
-                {isSaving ? 'Publishing...' : 'Publish New Version'}
-              </Button>
-            </div>
+      <div className="fixed bottom-0 left-64 right-0 p-4 bg-background border-t shadow-lg">
+        <div className="flex items-center justify-between max-w-4xl mx-auto">
+          <p className="text-sm text-muted-foreground">
+            {hasChanges ? 'You have unsaved changes' : 'No unsaved changes'}
+          </p>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setHasChanges(false)} disabled={!hasChanges}>
+              Discard
+            </Button>
+            <Button variant="outline" onClick={handleSaveDraft} disabled={isSaving || !hasChanges}>
+              {isSaving ? 'Saving...' : 'Save Draft'}
+            </Button>
+            <Button onClick={handlePublish} disabled={isSaving || !hasChanges}>
+              {isSaving ? 'Publishing...' : 'Publish New Version'}
+            </Button>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

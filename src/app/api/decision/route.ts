@@ -9,6 +9,7 @@ export interface DecisionAPIRequest {
   passengerToken: string;
   productId: string;
   productVersion: string;
+  claimDate?: string; // Optional: defaults to current date for eligibility check
 }
 
 export interface DecisionAPIResponse {
@@ -95,6 +96,22 @@ function validateRequest(body: unknown): { valid: true; data: DecisionAPIRequest
     return { valid: false, error: 'productVersion must be in format vX.Y (e.g., v1.0, v1.2)', code: 'INVALID_VERSION_FORMAT' };
   }
 
+  // Validate optional claimDate if provided (YYYY-MM-DD format)
+  let claimDate: string | undefined;
+  if (data.claimDate !== undefined) {
+    if (typeof data.claimDate !== 'string') {
+      return { valid: false, error: 'claimDate must be a string in YYYY-MM-DD format', code: 'INVALID_CLAIM_DATE' };
+    }
+    if (!dateRegex.test(data.claimDate)) {
+      return { valid: false, error: 'claimDate must be in YYYY-MM-DD format', code: 'INVALID_CLAIM_DATE_FORMAT' };
+    }
+    const claimDateObj = new Date(data.claimDate);
+    if (isNaN(claimDateObj.getTime())) {
+      return { valid: false, error: 'claimDate is not a valid date', code: 'INVALID_CLAIM_DATE' };
+    }
+    claimDate = data.claimDate;
+  }
+
   return {
     valid: true,
     data: {
@@ -104,6 +121,7 @@ function validateRequest(body: unknown): { valid: true; data: DecisionAPIRequest
       passengerToken: data.passengerToken as string,
       productId: data.productId as string,
       productVersion: productVersion,
+      claimDate: claimDate,
     }
   };
 }
@@ -187,6 +205,7 @@ export async function GET(): Promise<NextResponse> {
           passengerToken: 'string - Passenger identifier token',
           productId: 'string - Product ID (e.g., prod-eu-delay)',
           productVersion: 'string - Product version (e.g., v1.2)',
+          claimDate: 'string (optional) - Claim submission date in YYYY-MM-DD format, defaults to today',
         },
         response: {
           success: 'boolean',
