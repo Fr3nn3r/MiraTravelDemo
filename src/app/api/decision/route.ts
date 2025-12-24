@@ -27,6 +27,7 @@ export interface DecisionAPIResponse {
     id: string;
     rule: string;
     description: string;
+    input: Record<string, unknown>;
     result: 'pass' | 'fail' | 'skip';
     explanation: string;
   }[];
@@ -165,6 +166,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<DecisionA
         id: step.id,
         rule: step.rule,
         description: step.description,
+        input: step.input,
         result: step.result,
         explanation: step.explanation,
       })),

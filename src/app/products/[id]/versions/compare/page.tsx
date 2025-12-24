@@ -2,7 +2,7 @@
 
 import { use, useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -209,11 +209,43 @@ export default function CompareVersionsPage({
 }) {
   const { id } = use(params);
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isPublishing, setIsPublishing] = useState(false);
 
   const fromVersion = searchParams.get('from') || '';
   const toVersion = searchParams.get('to') || '';
+
+  const handleFromVersionChange = (value: string) => {
+    router.push(`/products/${id}/versions/compare?from=${value}&to=${toVersion}`);
+  };
+
+  const handleToVersionChange = (value: string) => {
+    router.push(`/products/${id}/versions/compare?from=${fromVersion}&to=${value}`);
+  };
+
+  const handlePublish = async () => {
+    if (!toVersion) return;
+
+    setIsPublishing(true);
+    try {
+      const res = await fetch(`/api/products/${id}/publish`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ version: toVersion }),
+      });
+
+      if (res.ok) {
+        router.push(`/products/${id}/versions`);
+        router.refresh();
+      }
+    } catch (error) {
+      console.error('Error publishing version:', error);
+    } finally {
+      setIsPublishing(false);
+    }
+  };
 
   useEffect(() => {
     async function fetchProduct() {
@@ -288,7 +320,7 @@ export default function CompareVersionsPage({
       <div className="flex items-center gap-4">
         <div className="flex-1">
           <label className="text-sm font-medium mb-2 block">From Version</label>
-          <Select defaultValue={fromVersion}>
+          <Select value={fromVersion} onValueChange={handleFromVersionChange}>
             <SelectTrigger>
               <SelectValue placeholder="Select version" />
             </SelectTrigger>
@@ -308,7 +340,7 @@ export default function CompareVersionsPage({
         </div>
         <div className="flex-1">
           <label className="text-sm font-medium mb-2 block">To Version</label>
-          <Select defaultValue={toVersion}>
+          <Select value={toVersion} onValueChange={handleToVersionChange}>
             <SelectTrigger>
               <SelectValue placeholder="Select version" />
             </SelectTrigger>
@@ -455,16 +487,43 @@ export default function CompareVersionsPage({
             <Button variant="outline" asChild>
               <Link href={`/products/${product.id}/versions`}>Cancel</Link>
             </Button>
-            <Button>
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              Approve & Publish {toVersion}
+            <Button onClick={handlePublish} disabled={isPublishing}>
+              {isPublishing ? (
+                <>
+                  <svg
+                    className="animate-spin -ml-1 mr-2 h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                  Publishing...
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  Approve & Publish {toVersion}
+                </>
+              )}
             </Button>
           </div>
         </>
