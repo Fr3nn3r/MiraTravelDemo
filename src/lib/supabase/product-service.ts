@@ -471,3 +471,44 @@ export async function createProductFromTemplate(
 
   return addProduct(newProduct);
 }
+
+export async function duplicateProduct(sourceProductId: string): Promise<Product | null> {
+  const sourceProduct = await getProductById(sourceProductId);
+  if (!sourceProduct) {
+    throw new Error(`Product ${sourceProductId} not found`);
+  }
+
+  // Get the active version's config to use as the base
+  const activeVersion = sourceProduct.versions.find(
+    (v) => v.version === sourceProduct.activeVersion
+  );
+  if (!activeVersion) {
+    throw new Error(`Active version not found for product ${sourceProductId}`);
+  }
+
+  const now = new Date().toISOString();
+  const productId = `prod-${generateId()}`;
+  const hash = generateHash();
+
+  const newProduct: Product = {
+    id: productId,
+    name: `Copy of ${sourceProduct.name}`,
+    description: sourceProduct.description,
+    status: 'draft',
+    activeVersion: 'v0.1',
+    versions: [
+      {
+        version: 'v0.1',
+        hash,
+        config: { ...activeVersion.config },
+        createdAt: now,
+        publishedAt: null,
+        status: 'draft',
+      },
+    ],
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  return addProduct(newProduct);
+}

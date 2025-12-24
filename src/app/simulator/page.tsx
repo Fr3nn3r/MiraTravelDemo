@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,7 +35,7 @@ function TraceStepCard({ step, index }: { step: TraceStep; index: number }) {
       </div>
       <p className="text-sm text-muted-foreground mb-2">{step.description}</p>
       <p className="text-sm">{step.explanation}</p>
-      <details className="mt-2">
+      <details className="mt-2" open>
         <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground">
           View input data
         </summary>
@@ -347,22 +348,33 @@ export default function SimulatorPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="productVersion">Version</Label>
-                  <Select
-                    value={claim.productVersion}
-                    onValueChange={(value) => handleInputChange('productVersion', value)}
-                    disabled={!selectedProduct}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select version" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {selectedProduct?.versions.map((version) => (
-                        <SelectItem key={version.version} value={version.version}>
-                          {version.version} ({version.hash})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="flex gap-2">
+                    <Select
+                      value={claim.productVersion}
+                      onValueChange={(value) => handleInputChange('productVersion', value)}
+                      disabled={!selectedProduct}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select version" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {selectedProduct?.versions.map((version) => (
+                          <SelectItem key={version.version} value={version.version}>
+                            {version.version} ({version.hash})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {claim.productId && (
+                      <Button variant="outline" size="icon" asChild title="Edit versions">
+                        <Link href={`/products/${claim.productId}/versions`}>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </Link>
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
 

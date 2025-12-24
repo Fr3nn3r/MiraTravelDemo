@@ -20,7 +20,7 @@ function StatusBadge({ status }: { status: ProductStatus }) {
   return <Badge className={className}>{label}</Badge>;
 }
 
-function ProductCard({ product }: { product: Product }) {
+function ProductCard({ product, onDuplicate }: { product: Product; onDuplicate: (id: string) => void }) {
   const lastUpdated = new Date(product.updatedAt).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
@@ -54,7 +54,7 @@ function ProductCard({ product }: { product: Product }) {
           <Button asChild variant="outline" size="sm">
             <Link href={`/products/${product.id}/versions`}>Versions</Link>
           </Button>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={() => onDuplicate(product.id)}>
             Duplicate
           </Button>
         </div>
@@ -90,6 +90,20 @@ export default function ProductsPage() {
 
   const handleProductCreated = (productId: string) => {
     router.push(`/products/${productId}`);
+  };
+
+  const handleDuplicate = async (productId: string) => {
+    try {
+      const res = await fetch(`/api/products/${productId}/duplicate`, {
+        method: 'POST',
+      });
+      const data = await res.json();
+      if (data.success && data.product) {
+        router.push(`/products/${data.product.id}`);
+      }
+    } catch (error) {
+      console.error('Error duplicating product:', error);
+    }
   };
 
   const filteredProducts =
@@ -143,7 +157,7 @@ export default function ProductsPage() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {filteredProducts.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <ProductCard key={product.id} product={product} onDuplicate={handleDuplicate} />
         ))}
       </div>
 

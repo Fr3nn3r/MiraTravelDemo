@@ -108,7 +108,7 @@ export async function evaluateClaimDecision(claim: ClaimInput): Promise<Decision
   );
 
   // Step 3: Check eligibility window
-  const claimTimestamp = new Date();
+  const claimTimestamp = claim.claimDate ? new Date(claim.claimDate) : new Date();
   const flightTimestamp = new Date(flightData.scheduledArrival);
   const hoursSinceFlight = (claimTimestamp.getTime() - flightTimestamp.getTime()) / (1000 * 60 * 60);
   const withinWindow = hoursSinceFlight <= config.eligibility.claimWindowHours;
