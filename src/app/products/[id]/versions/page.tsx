@@ -156,16 +156,15 @@ export default function VersionsPage({
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" asChild>
-                        <Link
-                          href={`/products/${product.id}/versions/compare?from=${
-                            product.versions[product.versions.indexOf(version) + 1]
-                              ?.version || version.version
-                          }&to=${version.version}`}
-                        >
-                          Compare
-                        </Link>
-                      </Button>
+                      {version.version !== product.activeVersion && (
+                        <Button variant="outline" size="sm" asChild>
+                          <Link
+                            href={`/products/${product.id}/versions/compare?from=${version.version}&to=${product.activeVersion}`}
+                          >
+                            Compare with Active
+                          </Link>
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
@@ -262,6 +261,7 @@ export default function VersionsPage({
                     <TableHead>Expected</TableHead>
                     <TableHead>Actual</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Details</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -288,6 +288,13 @@ export default function VersionsPage({
                         >
                           {result.passed ? 'PASS' : 'FAIL'}
                         </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {result.diff ? (
+                          <span className="text-sm text-red-600">{result.diff}</span>
+                        ) : (
+                          <span className="text-sm text-green-600">✓</span>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}

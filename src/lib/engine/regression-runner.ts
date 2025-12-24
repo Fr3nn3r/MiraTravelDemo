@@ -237,15 +237,19 @@ export async function runRegressionPack(
   const results: RegressionResult[] = [];
 
   for (const testCase of pack.testCases) {
-    // Override product ID and version for this test run
-    const adjustedTestCase: RegressionTestCase = {
-      ...testCase,
-      claimInput: {
-        ...testCase.claimInput,
-        productId,
-        productVersion,
-      },
-    };
+    // Skip override for tests that explicitly test invalid product/version scenarios
+    const isInvalidProductTest = testCase.id.includes('invalid');
+
+    const adjustedTestCase: RegressionTestCase = isInvalidProductTest
+      ? testCase
+      : {
+          ...testCase,
+          claimInput: {
+            ...testCase.claimInput,
+            productId,
+            productVersion,
+          },
+        };
     results.push(await runRegressionTest(adjustedTestCase));
   }
 
